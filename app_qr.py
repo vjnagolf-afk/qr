@@ -165,6 +165,6 @@ else:
 
 st.markdown("---")
 st.markdown(
-    "<p style='text-align: center; color: gray; font-size: 24px;'>Được thiết kế riêng phục vụ công tác chuyên môn - Trường THCS Nguyễn Chí Thanh 🏫</p>",
+    "<p style='text-align: center; color: gray; font-size: 18px;'>Được thiết kế riêng phục vụ công tác chuyên môn - Trường THCS Nguyễn Chí Thanh 🏫</p>",
     unsafe_allow_html=True
 )

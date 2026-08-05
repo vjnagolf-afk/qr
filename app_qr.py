@@ -122,7 +122,7 @@ if target_link:
                 if font is None:
                     font = ImageFont.load_default()
                 
-                text_to_display = f"Tác giả: {creator_name.strip()}"
+                text_to_display = f"Người tạo: {creator_name.strip()}"
                 
                 # Vẽ khung nền chứa tên đồng bộ màu với mã QR
                 draw.rectangle([(0, qr_height), (qr_width, qr_height + banner_height_val)], fill=qr_color)

@@ -17,7 +17,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# Tùy chỉnh giao diện CSS
+# Giao diện CSS tùy chỉnh
 st.markdown("""
     <style>
     .main-header {
@@ -56,19 +56,19 @@ st.markdown("""
 st.markdown("""
     <div class="main-header">
         <h1>🎓 TRƯỜNG THCS NGUYỄN CHÍ THANH</h1>
-        <p>⚡ Trợ lý Tạo Mã QR Sạch & Tùy Biến Tên Giáo Viên</p>
+        <p>⚡ Trợ lý Tạo Mã QR Sạch & Tùy Biến Tên Giáo Viên (Times New Roman)</p>
     </div>
 """, unsafe_allow_html=True)
 
 st.sidebar.markdown("### 🎨 Tùy chỉnh phong cách QR")
 qr_color = st.sidebar.color_picker("Chọn màu cho mã QR:", "#162447")
 bg_color = st.sidebar.color_picker("Chọn màu nền QR:", "#ffffff")
-box_size_val = st.sidebar.slider("Độ phân giải mã QR (Kích thước ảnh):", min_value=6, max_value=15, value=10)
+box_size_val = st.sidebar.slider("Độ phân giải mã QR (Kích thước ảnh):", min_value=6, max_value=20, value=12)
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("### ✍️ Tùy chỉnh chữ tên tác giả")
-custom_font_size = st.sidebar.slider("Chọn cỡ chữ (Pixel):", min_value=12, max_value=80, value=28)
-banner_height_val = st.sidebar.slider("Chiều cao khung chứa chữ:", min_value=40, max_value=140, value=75)
+custom_font_size = st.sidebar.slider("Chọn cỡ chữ (Pixel):", min_value=14, max_value=100, value=36)
+banner_height_val = st.sidebar.slider("Chiều cao khung chứa chữ:", min_value=40, max_value=160, value=80)
 
 st.markdown("### 📥 Nhập thông tin & Tên tác giả")
 target_link = st.text_input(
@@ -77,7 +77,7 @@ target_link = st.text_input(
 )
 
 creator_name = st.text_input(
-    "Tên người tạo / Giáo viên (Hỗ trợ tiếng Việt có dấu):",
+    "Tên người tạo / Giáo viên (Hỗ trợ tiếng Việt Unicode):",
     placeholder="VD: Thầy Lê Hồng Dương"
 )
 
@@ -98,19 +98,17 @@ if target_link:
             if creator_name.strip():
                 qr_width, qr_height = img_qr.size
 
-                # Tạo ảnh mới chứa QR và khung chữ bên dưới
                 new_img = Image.new("RGB", (qr_width, qr_height + banner_height_val), color=bg_color)
                 new_img.paste(img_qr, (0, 0))
                 
                 draw = ImageDraw.Draw(new_img)
                 
-                # Ưu tiên tìm các font chuẩn hỗ trợ tiếng Việt
+                # Ưu tiên tuyệt đối nạp bộ font Times New Roman vừa tải lên GitHub
                 font_paths = [
-                    "DejaVuSans.ttf",
+                    "timesbd.ttf",  # Times New Roman Bold (In đậm)
+                    "times.ttf",    # Times New Roman Thường
                     "DejaVuSans-Bold.ttf",
-                    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-                    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-                    "arial.ttf"
+                    "DejaVuSans.ttf"
                 ]
                 
                 font = None
@@ -129,7 +127,7 @@ if target_link:
                 # Vẽ khung nền chứa tên đồng bộ màu với mã QR
                 draw.rectangle([(0, qr_height), (qr_width, qr_height + banner_height_val)], fill=qr_color)
                 
-                # Căn giữa chữ trong khung một cách chuẩn xác
+                # Căn giữa chữ chuẩn xác tuyệt đối
                 bbox = draw.textbbox((0, 0), text_to_display, font=font)
                 text_w = bbox[2] - bbox[0]
                 text_h = bbox[3] - bbox[1]
@@ -137,7 +135,6 @@ if target_link:
                 text_x = (qr_width - text_w) / 2
                 text_y = qr_height + (banner_height_val - text_h) / 2
                 
-                # Vẽ chữ màu trắng nổi bật lên khung
                 draw.text((text_x, text_y), text_to_display, fill="#ffffff", font=font)
                 final_img = new_img
             else:
@@ -151,6 +148,7 @@ if target_link:
                 st.markdown("#### 📱 Mã QR Tùy Biến Của Bạn:")
                 st.image(buf.getvalue(), caption="Quét mã để truy cập trực tiếp", use_container_width=True)
                 
+                st.markdown("<br>", unsafe_allow_html=True)
                 st.download_button(
                     label="📥 TẢI ẢNH MÃ QR HOÀN CHỈNH (.PNG)",
                     data=buf.getvalue(),
@@ -163,7 +161,7 @@ if target_link:
     else:
         st.error("⚠️ Máy chủ chưa cài đặt thư viện cần thiết.")
 else:
-    st.info("💡 Thầy/Cô hãy nhập thông tin, điền tên tác giả và tùy chỉnh cỡ chữ ở thanh bên trái nhé!")
+    st.info("💡 Thầy/Cô hãy nhập link và tên tác giả để tạo mã QR chuẩn phong cách Times New Roman nhé!")
 
 st.markdown("---")
 st.markdown(

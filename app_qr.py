@@ -67,8 +67,8 @@ box_size_val = st.sidebar.slider("Độ phân giải mã QR (Kích thước ản
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("### ✍️ Tùy chỉnh chữ tên tác giả")
-custom_font_size = st.sidebar.slider("Chọn cỡ chữ (Pixel):", min_value=10, max_value=80, value=24)
-banner_height_val = st.sidebar.slider("Chiều cao khung chứa chữ:", min_value=30, max_value=120, value=60)
+custom_font_size = st.sidebar.slider("Chọn cỡ chữ (Pixel):", min_value=12, max_value=80, value=28)
+banner_height_val = st.sidebar.slider("Chiều cao khung chứa chữ:", min_value=40, max_value=140, value=75)
 
 st.markdown("### 📥 Nhập thông tin & Tên tác giả")
 target_link = st.text_input(
@@ -98,19 +98,19 @@ if target_link:
             if creator_name.strip():
                 qr_width, qr_height = img_qr.size
 
+                # Tạo ảnh mới chứa QR và khung chữ bên dưới
                 new_img = Image.new("RGB", (qr_width, qr_height + banner_height_val), color=bg_color)
                 new_img.paste(img_qr, (0, 0))
                 
                 draw = ImageDraw.Draw(new_img)
                 
-                # Danh sách đường dẫn font hỗ trợ tiếng Việt trên Linux/Cloud hoặc Windows
+                # Ưu tiên tìm các font chuẩn hỗ trợ tiếng Việt
                 font_paths = [
                     "DejaVuSans.ttf",
                     "DejaVuSans-Bold.ttf",
-                    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
                     "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-                    "arial.ttf",
-                    "angsana.ttc"
+                    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+                    "arial.ttf"
                 ]
                 
                 font = None
@@ -126,8 +126,10 @@ if target_link:
                 
                 text_to_display = f"Tác giả: {creator_name.strip()}"
                 
+                # Vẽ khung nền chứa tên đồng bộ màu với mã QR
                 draw.rectangle([(0, qr_height), (qr_width, qr_height + banner_height_val)], fill=qr_color)
                 
+                # Căn giữa chữ trong khung một cách chuẩn xác
                 bbox = draw.textbbox((0, 0), text_to_display, font=font)
                 text_w = bbox[2] - bbox[0]
                 text_h = bbox[3] - bbox[1]
@@ -135,6 +137,7 @@ if target_link:
                 text_x = (qr_width - text_w) / 2
                 text_y = qr_height + (banner_height_val - text_h) / 2
                 
+                # Vẽ chữ màu trắng nổi bật lên khung
                 draw.text((text_x, text_y), text_to_display, fill="#ffffff", font=font)
                 final_img = new_img
             else:
@@ -160,7 +163,7 @@ if target_link:
     else:
         st.error("⚠️ Máy chủ chưa cài đặt thư viện cần thiết.")
 else:
-    st.info("💡 Thầy/Cô hãy nhập thông tin và kiểm tra lại tên tiếng Việt có dấu nhé!")
+    st.info("💡 Thầy/Cô hãy nhập thông tin, điền tên tác giả và tùy chỉnh cỡ chữ ở thanh bên trái nhé!")
 
 st.markdown("---")
 st.markdown(

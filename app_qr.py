@@ -56,7 +56,7 @@ st.markdown("""
 st.markdown("""
     <div class="main-header">
         <h1>🎓 TRƯỜNG THCS NGUYỄN CHÍ THANH</h1>
-        <p>⚡ Trợ lý Tạo Mã QR Sạch & Tùy Biến Tên Giáo Viên (Times New Roman)</p>
+        <p>⚡ Trợ lý Tạo Mã QR Sạch, không QC & Tùy Biến màu sắc mã, tên người tạo</p>
     </div>
 """, unsafe_allow_html=True)
 

@@ -30,7 +30,7 @@ st.markdown("""
     }
     .main-header h1 {
         margin: 0;
-        font-size: 26px;
+        font-size: 56px;
         font-weight: 700;
     }
     .main-header p {

@@ -64,13 +64,12 @@ st.markdown("""
 st.sidebar.markdown("### 🎨 Tùy chỉnh phong cách QR")
 qr_color = st.sidebar.color_picker("Chọn màu cho mã QR:", "#162447")
 bg_color = st.sidebar.color_picker("Chọn màu nền QR:", "#ffffff")
-box_size_val = st.sidebar.slider("Độ phân giải mã QR:", min_value=6, max_value=15, value=10)
+box_size_val = st.sidebar.slider("Độ phân giải mã QR (Kích thước ảnh):", min_value=6, max_value=20, value=12)
 
-# Bổ sung thanh trượt tùy chỉnh cỡ chữ và chiều cao khung trực tiếp
+# Tùy chỉnh tỷ lệ chữ tác giả
 st.sidebar.markdown("---")
 st.sidebar.markdown("### ✍️ Tùy chỉnh chữ tên tác giả")
-font_size_val = st.sidebar.slider("Cỡ chữ tên tác giả:", min_value=12, max_value=60, value=28)
-banner_height_val = st.sidebar.slider("Chiều cao khung chữ:", min_value=40, max_value=120, value=70)
+font_scale_val = st.sidebar.slider("Tỷ lệ cỡ chữ (% so với khung):", min_value=10, max_value=50, value=28)
 
 st.markdown("### 📥 Nhập thông tin & Tên tác giả")
 target_link = st.text_input(
@@ -103,18 +102,24 @@ if target_link:
             if creator_name.strip():
                 qr_width, qr_height = img_qr.size
                 
-                # Tạo ảnh mới chứa QR và khung tên bên dưới theo thông số tùy chỉnh
+                # Tự động tính chiều cao khung chữ và cỡ chữ dựa trên độ rộng thực tế của ảnh QR
+                # Điều này giúp ảnh ở độ phân giải nào thì chữ cũng tự động to đẹp tương ứng
+                banner_height_val = int(qr_width * 0.15) # Chiều cao khung bằng 15% bề ngang QR
+                dynamic_font_size = int(banner_height_val * (font_scale_val / 50.0))
+                if dynamic_font_size < 10: dynamic_font_size = 10
+
+                # Tạo ảnh mới chứa QR và khung tên bên dưới
                 new_img = Image.new("RGB", (qr_width, qr_height + banner_height_val), color=bg_color)
                 new_img.paste(img_qr, (0, 0))
                 
                 draw = ImageDraw.Draw(new_img)
                 
-                # Tải font chữ theo cỡ người dùng chọn trên thanh trượt
+                # Nạp font chữ theo tỷ lệ tính toán
                 try:
-                    font = ImageFont.truetype("arial.ttf", font_size_val)
+                    font = ImageFont.truetype("arial.ttf", dynamic_font_size)
                 except:
                     try:
-                        font = ImageFont.truetype("DejaVuSans-Bold.ttf", font_size_val)
+                        font = ImageFont.truetype("DejaVuSans-Bold.ttf", dynamic_font_size)
                     except:
                         font = ImageFont.load_default()
                 
@@ -158,7 +163,7 @@ if target_link:
     else:
         st.error("⚠️ Máy chủ chưa cài đặt thư viện cần thiết.")
 else:
-    st.info("💡 Thầy/Cô hãy nhập đường link, điền tên và dùng thanh trượt bên trái để phóng to chữ theo ý muốn!")
+    st.info("💡 Thầy/Cô hãy nhập đường link, điền tên và tùy chỉnh tỷ lệ chữ ở bên trái nhé!")
 
 # Chân trang (Footer)
 st.markdown("---")

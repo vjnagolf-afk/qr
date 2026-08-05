@@ -30,7 +30,7 @@ st.markdown("""
     }
     .main-header h1 {
         margin: 0;
-        font-size: 56px;
+        font-size: 26px;
         font-weight: 700;
     }
     .main-header p {
@@ -56,23 +56,29 @@ st.markdown("""
 st.markdown("""
     <div class="main-header">
         <h1>🎓 TRƯỜNG THCS NGUYỄN CHÍ THANH</h1>
-        <p>⚡ Trợ lý Tạo Mã QR Sạch, không quảng cáo & Tùy Biến Tên Giáo Viên</p>
+        <p>⚡ Trợ lý Tạo Mã QR Sạch & Tùy Biến Tên Giáo Viên</p>
     </div>
 """, unsafe_allow_html=True)
 
 # Phần cấu hình tùy chỉnh trong sidebar
-st.sidebar.markdown("### MÃ QR PHONG CÁCH RIÊNG")
+st.sidebar.markdown("### 🎨 Tùy chỉnh phong cách QR")
 qr_color = st.sidebar.color_picker("Chọn màu cho mã QR:", "#162447")
 bg_color = st.sidebar.color_picker("Chọn màu nền QR:", "#ffffff")
-box_size_val = st.sidebar.slider("Độ phân giải (Kích thước):", min_value=8, max_value=15, value=12)
+box_size_val = st.sidebar.slider("Độ phân giải mã QR:", min_value=6, max_value=15, value=10)
+
+# Bổ sung thanh trượt tùy chỉnh cỡ chữ và chiều cao khung trực tiếp
+st.sidebar.markdown("---")
+st.sidebar.markdown("### ✍️ Tùy chỉnh chữ tên tác giả")
+font_size_val = st.sidebar.slider("Cỡ chữ tên tác giả:", min_value=12, max_value=60, value=28)
+banner_height_val = st.sidebar.slider("Chiều cao khung chữ:", min_value=40, max_value=120, value=70)
 
 st.markdown("### 📥 Nhập thông tin & Tên tác giả")
 target_link = st.text_input(
-    "Dán đường link liên kết:",
+    "Dán đường link bất kỳ:",
     placeholder="VD: https://thcsnguyenchithanh-lhd.streamlit.app/..."
 )
 
-# Thêm ô nhập tên người tạo / tên giáo viên
+# Ô nhập tên người tạo / tên giáo viên
 creator_name = st.text_input(
     "Tên người tạo / Giáo viên (Hiển thị ngay trên ảnh QR):",
     placeholder="VD: Thầy Lê Hồng Dương"
@@ -96,28 +102,26 @@ if target_link:
             
             if creator_name.strip():
                 qr_width, qr_height = img_qr.size
-                banner_height = 80 # Tăng chiều cao khung chứa tên để chữ hiển thị to hơn
                 
-                # Tạo ảnh mới chứa QR và khung tên to bên dưới
-                new_img = Image.new("RGB", (qr_width, qr_height + banner_height), color=bg_color)
+                # Tạo ảnh mới chứa QR và khung tên bên dưới theo thông số tùy chỉnh
+                new_img = Image.new("RGB", (qr_width, qr_height + banner_height_val), color=bg_color)
                 new_img.paste(img_qr, (0, 0))
                 
                 draw = ImageDraw.Draw(new_img)
                 
-                # Cố gắng nạp font chữ lớn hơn (nếu hệ thống hỗ trợ), hoặc dùng font mặc định
+                # Tải font chữ theo cỡ người dùng chọn trên thanh trượt
                 try:
-                    # Thử nạp font hệ thống phổ biến với kích thước to (size=24)
-                    font = ImageFont.truetype("arial.ttf", 24)
+                    font = ImageFont.truetype("arial.ttf", font_size_val)
                 except:
                     try:
-                        font = ImageFont.truetype("DejaVuSans-Bold.ttf", 24)
+                        font = ImageFont.truetype("DejaVuSans-Bold.ttf", font_size_val)
                     except:
                         font = ImageFont.load_default()
                 
                 text_to_display = f"Tác giả: {creator_name.strip()}"
                 
                 # Vẽ khung nền chứa tên
-                draw.rectangle([(0, qr_height), (qr_width, qr_height + banner_height)], fill=qr_color)
+                draw.rectangle([(0, qr_height), (qr_width, qr_height + banner_height_val)], fill=qr_color)
                 
                 # Căn giữa chữ trong khung
                 bbox = draw.textbbox((0, 0), text_to_display, font=font)
@@ -125,7 +129,7 @@ if target_link:
                 text_h = bbox[3] - bbox[1]
                 
                 text_x = (qr_width - text_w) / 2
-                text_y = qr_height + (banner_height - text_h) / 2
+                text_y = qr_height + (banner_height_val - text_h) / 2
                 
                 draw.text((text_x, text_y), text_to_display, fill="#ffffff", font=font)
                 final_img = new_img
@@ -138,12 +142,12 @@ if target_link:
             
             col1, col2, col3 = st.columns([1, 2, 1])
             with col2:
-                st.markdown("#### 📱 Mã QR CỦA THẦY/CÔ:")
+                st.markdown("#### 📱 Mã QR Tùy Biến Của Bạn:")
                 st.image(buf.getvalue(), caption="Quét mã để truy cập trực tiếp", use_container_width=True)
                 
                 # Nút tải ảnh QR về máy
                 st.download_button(
-                    label="📥 TẢI ẢNH MÃ QR CÓ TÊN TO (.PNG)",
+                    label="📥 TẢI ẢNH MÃ QR HOÀN CHỈNH (.PNG)",
                     data=buf.getvalue(),
                     file_name="ma_qr_giao_vien_chuyen_nghiep.png",
                     mime="image/png",
@@ -154,7 +158,7 @@ if target_link:
     else:
         st.error("⚠️ Máy chủ chưa cài đặt thư viện cần thiết.")
 else:
-    st.info("💡 Thầy/Cô hãy nhập đường link và điền tên của mình để xem kích thước chữ được phóng to rõ nét!")
+    st.info("💡 Thầy/Cô hãy nhập đường link, điền tên và dùng thanh trượt bên trái để phóng to chữ theo ý muốn!")
 
 # Chân trang (Footer)
 st.markdown("---")

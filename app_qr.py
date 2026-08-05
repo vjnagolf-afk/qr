@@ -72,13 +72,13 @@ banner_height_val = st.sidebar.slider("Chiều cao khung chứa chữ:", min_val
 
 st.markdown("### 📥 Nhập thông tin & Tên tác giả")
 target_link = st.text_input(
-    "Dán đường link bất kỳ:",
+    "Link liên kết:",
     placeholder="VD: https://thcsnguyenchithanh-lhd.streamlit.app/..."
 )
 
 creator_name = st.text_input(
-    "Tên người tạo / Giáo viên (Hỗ trợ tiếng Việt Unicode):",
-    placeholder="VD: Thầy Lê Hồng Dương"
+    "Người tạo:",
+    placeholder="VD: Thầy Lê Hồng Dưỡng"
 )
 
 if target_link:
@@ -161,10 +161,10 @@ if target_link:
     else:
         st.error("⚠️ Máy chủ chưa cài đặt thư viện cần thiết.")
 else:
-    st.info("💡 Thầy/Cô hãy nhập link và tên tác giả để tạo mã QR chuẩn phong cách Times New Roman nhé!")
+    st.info("💡 Thầy/Cô nhập link và tên tác giả ạo mã QR!")
 
 st.markdown("---")
 st.markdown(
-    "<p style='text-align: center; color: gray; font-size: 12px;'>Được thiết kế riêng phục vụ công tác chuyên môn - Trường THCS Nguyễn Chí Thanh 🏫</p>",
+    "<p style='text-align: center; color: gray; font-size: 24px;'>Được thiết kế riêng phục vụ công tác chuyên môn - Trường THCS Nguyễn Chí Thanh 🏫</p>",
     unsafe_allow_html=True
 )

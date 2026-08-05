@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import streamlit as st
 import io
+import os
 
 try:
     import qrcode
@@ -52,7 +53,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Tiêu đề giao diện chính
 st.markdown("""
     <div class="main-header">
         <h1>🎓 TRƯỜNG THCS NGUYỄN CHÍ THANH</h1>
@@ -60,13 +60,11 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# Phần cấu hình tùy chỉnh trong sidebar
 st.sidebar.markdown("### 🎨 Tùy chỉnh phong cách QR")
 qr_color = st.sidebar.color_picker("Chọn màu cho mã QR:", "#162447")
 bg_color = st.sidebar.color_picker("Chọn màu nền QR:", "#ffffff")
 box_size_val = st.sidebar.slider("Độ phân giải mã QR (Kích thước ảnh):", min_value=6, max_value=15, value=10)
 
-# Tùy chỉnh kích thước chữ tác giả trực tiếp bằng số pixel mong muốn
 st.sidebar.markdown("---")
 st.sidebar.markdown("### ✍️ Tùy chỉnh chữ tên tác giả")
 custom_font_size = st.sidebar.slider("Chọn cỡ chữ (Pixel):", min_value=10, max_value=80, value=24)
@@ -78,16 +76,14 @@ target_link = st.text_input(
     placeholder="VD: https://thcsnguyenchithanh-lhd.streamlit.app/..."
 )
 
-# Ô nhập tên người tạo / tên giáo viên
 creator_name = st.text_input(
-    "Tên người tạo / Giáo viên (Hiển thị ngay trên ảnh QR):",
+    "Tên người tạo / Giáo viên (Hỗ trợ tiếng Việt có dấu):",
     placeholder="VD: Thầy Lê Hồng Dương"
 )
 
 if target_link:
     if HAS_QRCODE:
         try:
-            # Khởi tạo tạo mã QR
             qr = qrcode.QRCode(
                 version=2,
                 error_correction=qrcode.constants.ERROR_CORRECT_H,
@@ -97,33 +93,41 @@ if target_link:
             qr.add_data(target_link)
             qr.make(fit=True)
             
-            # Tạo hình ảnh mã QR cơ bản
             img_qr = qr.make_image(fill_color=qr_color, back_color=bg_color).convert('RGB')
             
             if creator_name.strip():
                 qr_width, qr_height = img_qr.size
 
-                # Tạo ảnh mới chứa QR và khung tên bên dưới
                 new_img = Image.new("RGB", (qr_width, qr_height + banner_height_val), color=bg_color)
                 new_img.paste(img_qr, (0, 0))
                 
                 draw = ImageDraw.Draw(new_img)
                 
-                # Nạp font chữ theo đúng kích thước Pixel thầy chọn trên thanh trượt
-                try:
-                    font = ImageFont.truetype("arial.ttf", custom_font_size)
-                except:
+                # Danh sách đường dẫn font hỗ trợ tiếng Việt trên Linux/Cloud hoặc Windows
+                font_paths = [
+                    "DejaVuSans.ttf",
+                    "DejaVuSans-Bold.ttf",
+                    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+                    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+                    "arial.ttf",
+                    "angsana.ttc"
+                ]
+                
+                font = None
+                for path in font_paths:
                     try:
-                        font = ImageFont.truetype("DejaVuSans-Bold.ttf", custom_font_size)
+                        font = ImageFont.truetype(path, custom_font_size)
+                        break
                     except:
-                        font = ImageFont.load_default()
+                        continue
+                
+                if font is None:
+                    font = ImageFont.load_default()
                 
                 text_to_display = f"Tác giả: {creator_name.strip()}"
                 
-                # Vẽ khung nền chứa tên
                 draw.rectangle([(0, qr_height), (qr_width, qr_height + banner_height_val)], fill=qr_color)
                 
-                # Căn giữa chữ trong khung
                 bbox = draw.textbbox((0, 0), text_to_display, font=font)
                 text_w = bbox[2] - bbox[0]
                 text_h = bbox[3] - bbox[1]
@@ -136,7 +140,6 @@ if target_link:
             else:
                 final_img = img_qr
 
-            # Xuất ra bộ nhớ đệm
             buf = io.BytesIO()
             final_img.save(buf, format="PNG")
             
@@ -145,7 +148,6 @@ if target_link:
                 st.markdown("#### 📱 Mã QR Tùy Biến Của Bạn:")
                 st.image(buf.getvalue(), caption="Quét mã để truy cập trực tiếp", use_container_width=True)
                 
-                # Nút tải ảnh QR về máy
                 st.download_button(
                     label="📥 TẢI ẢNH MÃ QR HOÀN CHỈNH (.PNG)",
                     data=buf.getvalue(),
@@ -154,13 +156,12 @@ if target_link:
                     type="primary"
                 )
         except Exception as e:
-            st.error(f"⚠️ Có lỗi xảy ra khi tạo mã QR: {e}")
+            st.error(f"⚠️ Có lỗi xảy ra: {e}")
     else:
         st.error("⚠️ Máy chủ chưa cài đặt thư viện cần thiết.")
 else:
-    st.info("💡 Thầy/Cô hãy nhập đường link, điền tên và kéo thanh trượt 'Chọn cỡ chữ (Pixel)' ở bên trái để thay đổi độ lớn của chữ theo ý muốn nhé!")
+    st.info("💡 Thầy/Cô hãy nhập thông tin và kiểm tra lại tên tiếng Việt có dấu nhé!")
 
-# Chân trang (Footer)
 st.markdown("---")
 st.markdown(
     "<p style='text-align: center; color: gray; font-size: 12px;'>Được thiết kế riêng phục vụ công tác chuyên môn - Trường THCS Nguyễn Chí Thanh 🏫</p>",

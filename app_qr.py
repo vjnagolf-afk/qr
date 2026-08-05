@@ -61,7 +61,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Phần cấu hình nâng cao trong sidebar (Giúp giáo viên tùy chỉnh màu sắc mã QR theo sở thích)
-st.sidebar.markdown("### 🎨 Tùy chỉnh phong cách QR")
+st.sidebar.markdown("### 🎨 TẠO QR PHONG CÁCH RIÊNG")
 qr_color = st.sidebar.color_picker("Chọn màu cho mã QR:", "#162447")
 bg_color = st.sidebar.color_picker("Chọn màu nền QR:", "#ffffff")
 

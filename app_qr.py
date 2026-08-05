@@ -56,23 +56,23 @@ st.markdown("""
 st.markdown("""
     <div class="main-header">
         <h1>🎓 TRƯỜNG THCS NGUYỄN CHÍ THANH</h1>
-        <p>⚡ Trợ lý Tạo Mã QR Sạch & Tùy Biến Tên Giáo Viên</p>
+        <p>⚡ Trợ lý Tạo Mã QR Sạch, không quảng cáo & Tùy Biến Tên Giáo Viên</p>
     </div>
 """, unsafe_allow_html=True)
 
 # Phần cấu hình tùy chỉnh trong sidebar
-st.sidebar.markdown("### 🎨 Tùy chỉnh phong cách QR")
+st.sidebar.markdown("### MÃ QR PHONG CÁCH RIÊNG")
 qr_color = st.sidebar.color_picker("Chọn màu cho mã QR:", "#162447")
 bg_color = st.sidebar.color_picker("Chọn màu nền QR:", "#ffffff")
-box_size_val = st.sidebar.slider("Độ phân giải (Kích thước):", min_value=8, max_value=15, value=10)
+box_size_val = st.sidebar.slider("Độ phân giải (Kích thước):", min_value=8, max_value=15, value=12)
 
 st.markdown("### 📥 Nhập thông tin & Tên tác giả")
 target_link = st.text_input(
-    "Dán đường link bất kỳ:",
+    "Dán đường link liên kết:",
     placeholder="VD: https://thcsnguyenchithanh-lhd.streamlit.app/..."
 )
 
-# Thêm ô nhập tên người tạo / tên giáo viên để gắn trực tiếp lên QR
+# Thêm ô nhập tên người tạo / tên giáo viên
 creator_name = st.text_input(
     "Tên người tạo / Giáo viên (Hiển thị ngay trên ảnh QR):",
     placeholder="VD: Thầy Lê Hồng Dương"
@@ -83,8 +83,8 @@ if target_link:
         try:
             # Khởi tạo tạo mã QR
             qr = qrcode.QRCode(
-                version=2,  # Tăng version để có đủ không gian cho chữ
-                error_correction=qrcode.constants.ERROR_CORRECT_H, # Mức độ sửa lỗi cao để chèn chữ/ảnh an toàn
+                version=2,
+                error_correction=qrcode.constants.ERROR_CORRECT_H,
                 box_size=box_size_val,
                 border=4
             )
@@ -94,31 +94,32 @@ if target_link:
             # Tạo hình ảnh mã QR cơ bản
             img_qr = qr.make_image(fill_color=qr_color, back_color=bg_color).convert('RGB')
             
-            # Nếu người dùng có nhập tên, tiến hành ghép thêm băng thông chứa tên ở phía dưới mã QR
             if creator_name.strip():
                 qr_width, qr_height = img_qr.size
-                banner_height = 50 # Chiều cao của khung chứa tên
+                banner_height = 80 # Tăng chiều cao khung chứa tên để chữ hiển thị to hơn
                 
-                # Tạo bức ảnh mới lớn hơn để chứa cả mã QR và khung tên bên dưới
+                # Tạo ảnh mới chứa QR và khung tên to bên dưới
                 new_img = Image.new("RGB", (qr_width, qr_height + banner_height), color=bg_color)
                 new_img.paste(img_qr, (0, 0))
                 
-                # Vẽ chữ lên khung
                 draw = ImageDraw.Draw(new_img)
-                try:
-                    # Cố gắng sử dụng font mặc định hệ thống
-                    font = ImageFont.load_default()
-                except:
-                    font = None
                 
-                # Tính toán vị trí đặt chữ ở giữa khung dưới
+                # Cố gắng nạp font chữ lớn hơn (nếu hệ thống hỗ trợ), hoặc dùng font mặc định
+                try:
+                    # Thử nạp font hệ thống phổ biến với kích thước to (size=24)
+                    font = ImageFont.truetype("arial.ttf", 24)
+                except:
+                    try:
+                        font = ImageFont.truetype("DejaVuSans-Bold.ttf", 24)
+                    except:
+                        font = ImageFont.load_default()
+                
                 text_to_display = f"Tác giả: {creator_name.strip()}"
                 
-                # Vẽ nền chữ hoặc đường kẻ phân cách cho sinh động
+                # Vẽ khung nền chứa tên
                 draw.rectangle([(0, qr_height), (qr_width, qr_height + banner_height)], fill=qr_color)
                 
-                # Tải màu chữ trắng nổi bật trên nền màu của QR
-                # Dùng textbbox để căn giữa chữ
+                # Căn giữa chữ trong khung
                 bbox = draw.textbbox((0, 0), text_to_display, font=font)
                 text_w = bbox[2] - bbox[0]
                 text_h = bbox[3] - bbox[1]
@@ -131,18 +132,18 @@ if target_link:
             else:
                 final_img = img_qr
 
-            # Xuất ra bộ nhớ đệm để hiển thị và tải về
+            # Xuất ra bộ nhớ đệm
             buf = io.BytesIO()
             final_img.save(buf, format="PNG")
             
             col1, col2, col3 = st.columns([1, 2, 1])
             with col2:
-                st.markdown("#### 📱 Mã QR Tùy Biến Của Bạn:")
+                st.markdown("#### 📱 Mã QR CỦA THẦY/CÔ:")
                 st.image(buf.getvalue(), caption="Quét mã để truy cập trực tiếp", use_container_width=True)
                 
                 # Nút tải ảnh QR về máy
                 st.download_button(
-                    label="📥 TẢI ẢNH MÃ QR CÓ TÊN (.PNG)",
+                    label="📥 TẢI ẢNH MÃ QR CÓ TÊN TO (.PNG)",
                     data=buf.getvalue(),
                     file_name="ma_qr_giao_vien_chuyen_nghiep.png",
                     mime="image/png",
@@ -153,7 +154,7 @@ if target_link:
     else:
         st.error("⚠️ Máy chủ chưa cài đặt thư viện cần thiết.")
 else:
-    st.info("💡 Thầy/Cô hãy nhập đường link và điền tên của mình vào ô phía trên để mã QR hiển thị trực tiếp tên tác giả!")
+    st.info("💡 Thầy/Cô hãy nhập đường link và điền tên của mình để xem kích thước chữ được phóng to rõ nét!")
 
 # Chân trang (Footer)
 st.markdown("---")
